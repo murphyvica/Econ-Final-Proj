@@ -3,6 +3,8 @@ import pandas as pd
 
 ## 1) Join housing data, GDP, mortage rates, create boolean column for election year
 
+# Importing data, selecting subset based on dates of housing data
+
 WA = pd.read_csv("data\Washington.csv")
 GDP = pd.read_csv("data\GDP.csv")
 MORT = pd.read_csv("data\MORTGAGE30US.csv")
@@ -13,16 +15,29 @@ MORT["DATE"] = pd.to_datetime(MORT["DATE"])
 
 start_date = WA["Date"].min()
 GDP = GDP[GDP.DATE.dt.year >= start_date.year]
-MORT = MORT[MORT.DATE >= start_date]
+MORT = MORT[MORT.DATE.dt.year >= start_date.year]
+
+# Interpolating GDP and Mortgage data
 
 GDP.set_index('DATE', inplace=True)
-GDP_day = GDP.resample('D').ffill()
+GDP_day = GDP.resample('D').interpolate(method='spline', order=3)
 
 MORT.set_index('DATE', inplace=True)
-MORT_day = MORT.resample('D').ffill()
+MORT_day = MORT.resample('D').interpolate(method='spline', order=3)  # can use ffill instead: MORT_day = MORT.resample('D').ffill() 
+
+# Joining data together
 
 df = pd.merge(WA, GDP_day, left_on="Date", right_on="DATE", how='left')
 df = pd.merge(df, MORT_day, left_on="Date", right_on="DATE", how='left')
+
+# adding election year boolean column
+
+df['is_election'] = df.Date.dt.year % 4 == 0
+
+df.rename(columns={'MORTGAGE30US': 'Mortgage (30Yr)'}, inplace=True)
+
+print(df)
+
 
 ## 2) Cleaning data: check null, negative values
 
