@@ -1,5 +1,10 @@
 import numpy as np
 import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import Lasso
+from sklearn.metrics import mean_squared_error, r2_score
+import matplotlib.pyplot as plt
 
 ## 1) Join housing data, GDP, mortage rates, create boolean column for election year
 
@@ -41,7 +46,12 @@ print(df)
 
 ## 2) Cleaning data: check null, negative values
 
+# removes rows of any data points that contain null values
+df = df.dropna()
 
+# checks and removes any rows that contain unusual values outside the dataset (negative values)
+col_check = df.select_dtypes(include=[np.number]).columns
+df = df[(df[col_check] >= 0).all(axis = 1)]
 
 
 ## 3) LASSO regression model
