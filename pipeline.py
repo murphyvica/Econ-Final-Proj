@@ -41,8 +41,6 @@ df['is_election'] = df.Date.dt.year % 4 == 0
 
 df.rename(columns={'MORTGAGE30US': 'Mortgage (30Yr)'}, inplace=True)
 
-print(df)
-
 
 ## 2) Cleaning data: check null, negative values
 
@@ -53,6 +51,10 @@ df = df.dropna()
 col_check = df.select_dtypes(include=[np.number]).columns
 df = df[(df[col_check] >= 0).all(axis = 1)]
 
+# converting boolean to int
+df['is_election'] = df['is_election'].astype(int)
+
+print(df)
 
 ## 3) LASSO regression model
 
