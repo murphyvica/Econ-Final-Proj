@@ -58,7 +58,28 @@ print(df)
 
 ## 3) LASSO regression model
 
+# Define LASSO model
+X = df[['GDP', 'Mortgage (30Yr)', 'is_election']]
+y = df['Price']
 
+# create train and test sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2)
+
+# standardizing
+scale = StandardScaler()
+X_train_scale = scale.fit_transform(X_train)
+X_test_scale = scale.transform(X_test)
+
+# train model
+lasso = Lasso(alpha = 0.1)
+lasso.fit(X_train_scale, y_train)
+
+# prediction model
+y_train_pred = lasso.predict(X_train_scale)
+y_test_pred = lasso.predict(X_test_scale)
+
+print(y_train_pred)
+print(y_test_pred)
 
 
 ## 4) Analysis, data viz, r-squared for other states (running LASSO regression for each state, comparing how well model works)
