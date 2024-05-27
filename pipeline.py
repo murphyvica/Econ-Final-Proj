@@ -11,35 +11,44 @@ import matplotlib.pyplot as plt
 # Importing data, selecting subset based on dates of housing data
 
 WA = pd.read_csv("data\Washington.csv")
-GDP = pd.read_csv("data\GDP.csv")
+GDP = pd.read_csv("data\WA_GDP.csv")
 MORT = pd.read_csv("data\MORTGAGE30US.csv")
+CPI = pd.read_csv("data\CPIAUCSL.csv")
 
 WA["Date"] = pd.to_datetime(WA["Date"])
 GDP["DATE"] = pd.to_datetime(GDP["DATE"])
 MORT["DATE"] = pd.to_datetime(MORT["DATE"])
+CPI["DATE"] = pd.to_datetime(CPI["DATE"])
 
 start_date = WA["Date"].min()
 GDP = GDP[GDP.DATE.dt.year >= start_date.year]
 MORT = MORT[MORT.DATE.dt.year >= start_date.year]
+CPI = CPI[CPI.DATE.dt.year >= start_date.year]
 
 # Interpolating GDP and Mortgage data
 
 GDP.set_index('DATE', inplace=True)
 GDP_day = GDP.resample('D').interpolate(method='spline', order=3)
 
+
 MORT.set_index('DATE', inplace=True)
 MORT_day = MORT.resample('D').interpolate(method='spline', order=3)  # can use ffill instead: MORT_day = MORT.resample('D').ffill() 
+
+CPI.set_index('DATE', inplace=True)
+CPI_day = CPI.resample('D').interpolate(method='spline', order=3)
 
 # Joining data together
 
 df = pd.merge(WA, GDP_day, left_on="Date", right_on="DATE", how='left')
 df = pd.merge(df, MORT_day, left_on="Date", right_on="DATE", how='left')
+df = pd.merge(df, CPI_day, left_on="Date", right_on="DATE", how='left')
 
 # adding election year boolean column
 
 df['is_election'] = df.Date.dt.year % 4 == 0
 
 df.rename(columns={'MORTGAGE30US': 'Mortgage (30Yr)'}, inplace=True)
+df.rename(columns={'WANGSP': 'GDP'}, inplace=True)
 
 
 ## 2) Cleaning data: check null, negative values
