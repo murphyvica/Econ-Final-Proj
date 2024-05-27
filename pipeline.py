@@ -89,6 +89,15 @@ test_mse = mean_squared_error(y_test, y_test_pred)
 train_r2 = r2_score(y_train, y_train_pred)
 test_r2 = r2_score(y_test, y_test_pred)
 
+plt.figure(figsize=(10, 5))
+plt.plot(df['Date'], df['Price'], label='Actual Prices')
+plt.plot(df['Date'][X_train.index], y_train_pred, label='Training Predictions', alpha=0.7)
+plt.plot(df['Date'][X_test.index], y_test_pred, label='Testing Predictions', alpha=0.7)
+plt.xlabel('Date')
+plt.ylabel('Price')
+plt.legend()
+plt.title('Housing Prices: Actual vs Predicted')
+plt.show()
 
 ## 5) Creating presentation, 
 
