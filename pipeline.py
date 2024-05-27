@@ -84,7 +84,10 @@ print(y_test_pred)
 
 ## 4) Analysis, data viz, r-squared for other states (running LASSO regression for each state, comparing how well model works)
 
-
+train_mse = mean_squared_error(y_train, y_train_pred)
+test_mse = mean_squared_error(y_test, y_test_pred)
+train_r2 = r2_score(y_train, y_train_pred)
+test_r2 = r2_score(y_test, y_test_pred)
 
 
 ## 5) Creating presentation, 
