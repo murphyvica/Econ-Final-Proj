@@ -77,12 +77,33 @@ print(df)
 # Define LASSO model
 X = df[['GDP', 'Mortgage (30Yr)', 'is_election', 'CPI', 'FEDFUNDS']]
 y = df['Price']
+dates = df['Date']
 
 poly = PolynomialFeatures(degree=3)
 X_poly = poly.fit_transform(X)
 
 # create train and test sets
-X_train, X_test, y_train, y_test, dates_train, dates_test = train_test_split(X_poly, y, df['Date'],test_size = 0.2)
+#X_train, X_test, y_train, y_test, dates_train, dates_test = train_test_split(X_poly, y, df['Date'],test_size = 0.2)
+
+split_date_1 = '2015-03-01'
+split_date_2 = '2020-03-01'
+
+train = df[(df['Date'] < split_date_1) | (df['Date'] > split_date_2)]
+
+test = df[(df['Date'] >= split_date_1) & (df['Date'] <= split_date_2)]
+
+
+# Split the data into training and test sets
+
+
+X_train = train[['GDP', 'Mortgage (30Yr)', 'is_election', 'CPI', 'FEDFUNDS']]
+y_train = train['Price']
+dates_train = train['Date']
+
+X_test = test[['GDP', 'Mortgage (30Yr)', 'is_election', 'CPI', 'FEDFUNDS']]
+y_test = test['Price']
+dates_test = test['Date']
+
 
 # standardizing
 scale = StandardScaler()
@@ -107,12 +128,17 @@ train_results = pd.DataFrame({'Date': dates_train, 'Actual': y_train, 'Predicted
 test_results = pd.DataFrame({'Date': dates_test, 'Actual': y_test, 'Predicted': y_pred_test})
 
 # Concatenate results
-all_results = pd.concat([train_results, test_results]).sort_values('Date')
+#all_results = pd.concat([train_results, test_results]).sort_values('Date')
+
+train_seg_1 = train_results[train_results['Date'] <= split_date_1]
+train_seg_2 = train_results[train_results['Date'] >= split_date_2]
 
 # Plot the results
 plt.figure(figsize=(10, 6))
 plt.plot(df['Date'], df['Price'], label='Actual')
-plt.plot(all_results['Date'], all_results['Predicted'], label='Predicted')
+plt.plot(train_seg_1['Date'], train_seg_1['Predicted'], label='Predicted Train', color = 'Orange')
+plt.plot(test_results['Date'], test_results['Predicted'], label='Predicted Test', color = 'Green')
+plt.plot(train_seg_2['Date'], train_seg_2['Predicted'], color = 'Orange')
 plt.xlabel('Date')
 plt.ylabel('Price')
 plt.title('Polynomial Regression')
