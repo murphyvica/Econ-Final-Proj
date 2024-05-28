@@ -5,6 +5,8 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import Lasso
 from sklearn.metrics import mean_squared_error, r2_score
 import matplotlib.pyplot as plt
+import plotly.graph_objs as go
+import plotly.express as px
 
 ## 1) Join housing data, GDP, mortage rates, create boolean column for election year
 
@@ -113,4 +115,45 @@ plt.show()
 
 ## 5) Creating presentation, 
 
+# PLOTS data for all states allowing for user to choose which state to see
+# reads state data
+state_data = pd.read_csv("data/State.csv")
+state = pd.DataFrame(state_data)
+# list to filter out dates for plotting
+exclude = ['RegionID', 'SizeRank','RegionName', 'RegionType', 'StateName']
 
+# identifies dates from column names and arranges data for plotting
+date_columns = [col for col in state.columns if col not in exclude]
+melted = state.melt(id_vars='RegionName', value_vars=date_columns, var_name='Date', value_name='Price')
+
+# converts to datetime
+df_melted['Date'] = pd.to_datetime(df_melted['Date'], format='%Y-%m-%d')
+
+# creates interactive plot
+fig = px.line(df_melted, x='Date', y='Price', color='RegionName', title='Housing Prices Over Time')
+
+# widget to plot
+fig.update_layout(
+    updatemenus=[
+        dict(
+            type="dropdown",
+            buttons=[
+                dict(
+                    label="All",
+                    method="update",
+                    args=[{"visible": [True] * len(df_melted['RegionName'].unique())},
+                          {"title": "All States"}]),
+            ] + [
+                dict(
+                    label=state,
+                    method="update",
+                    args=[{"visible": [region == state for region in df_melted['RegionName']]},
+                          {"title": f"State: {state}"}])
+                for state in df_melted['RegionName'].unique()
+            ],
+            direction="down"
+        )
+    ]
+)
+
+fig.show()
