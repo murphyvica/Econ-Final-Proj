@@ -63,8 +63,9 @@ df.rename(columns={'CPIAUCSL': 'CPI'}, inplace=True)
 df = df.dropna()
 
 # checks and removes any rows that contain unusual values outside the dataset (negative values)
-col_check = df.select_dtypes(include=[np.number]).columns
-df = df[(df[col_check] >= 0).all(axis = 1)]
+col_check = ['Price']
+condition = (df[col_check] >= 0).all(axis=1)
+df = df[condition]
 
 # converting boolean to int
 df['is_election'] = df['is_election'].astype(int)
