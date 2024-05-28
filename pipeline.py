@@ -65,47 +65,50 @@ df['is_election'] = df['is_election'].astype(int)
 
 print(df)
 
-## 3) LASSO regression model
-
 # Define LASSO model
 X = df[['GDP', 'Mortgage (30Yr)', 'is_election']]
 y = df['Price']
 
+poly = PolynomialFeatures(degree=3)
+X_poly = poly.fit_transform(X)
+
 # create train and test sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2)
+X_train, X_test, y_train, y_test, dates_train, dates_test = train_test_split(X_poly, y, df['Date'],test_size = 0.2)
 
 # standardizing
 scale = StandardScaler()
 X_train_scale = scale.fit_transform(X_train)
 X_test_scale = scale.transform(X_test)
 
-# train model
-lasso = Lasso(alpha = 0.1)
-lasso.fit(X_train_scale, y_train)
+# Train the model
+poly_reg = LinearRegression()
+poly_reg.fit(X_train, y_train)
 
-# prediction model
-y_train_pred = lasso.predict(X_train_scale)
-y_test_pred = lasso.predict(X_test_scale)
+# Predictions
+y_pred_train = poly_reg.predict(X_train)
+y_pred_test = poly_reg.predict(X_test)
 
-print(y_train_pred)
-print(y_test_pred)
+print(y_pred_train)
+print(y_pred_test)
 
 
 ## 4) Analysis, data viz, r-squared for other states (running LASSO regression for each state, comparing how well model works)
 
-train_mse = mean_squared_error(y_train, y_train_pred)
-test_mse = mean_squared_error(y_test, y_test_pred)
-train_r2 = r2_score(y_train, y_train_pred)
-test_r2 = r2_score(y_test, y_test_pred)
+# Create a dataframe to align predictions with dates
+train_results = pd.DataFrame({'Date': dates_train, 'Actual': y_train, 'Predicted': y_pred_train})
+test_results = pd.DataFrame({'Date': dates_test, 'Actual': y_test, 'Predicted': y_pred_test})
 
-plt.figure(figsize=(10, 5))
-plt.plot(df['Date'], df['Price'], label='Actual Prices')
-plt.plot(df['Date'][X_train.index], y_train_pred, label='Training Predictions', alpha=0.7)
-plt.plot(df['Date'][X_test.index], y_test_pred, label='Testing Predictions', alpha=0.7)
+# Concatenate results
+all_results = pd.concat([train_results, test_results]).sort_values('Date')
+
+# Plot the results
+plt.figure(figsize=(10, 6))
+plt.plot(df['Date'], df['Price'], label='Actual')
+plt.plot(all_results['Date'], all_results['Predicted'], label='Predicted')
 plt.xlabel('Date')
 plt.ylabel('Price')
+plt.title('Polynomial Regression')
 plt.legend()
-plt.title('Housing Prices: Actual vs Predicted')
 plt.show()
 
 ## 5) Creating presentation, 
