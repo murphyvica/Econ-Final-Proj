@@ -60,19 +60,22 @@ df.rename(columns={'MORTGAGE30US': 'Mortgage (30Yr)'}, inplace=True)
 df.rename(columns={'WANGSP': 'GDP'}, inplace=True)
 df.rename(columns={'CPIAUCSL': 'CPI'}, inplace=True)
 
+print('2012 Data?', df[(df['Date'] < '2015-01-01') & (df['Date'] > '2011-01-01')])
 ## 2) Cleaning data: check null, negative values
 
 # removes rows of any data points that contain null values
 df = df.dropna()
 
 # checks and removes any rows that contain unusual values outside the dataset (negative values)
-col_check = df.select_dtypes(include=[np.number]).columns
-df = df[(df[col_check] >= 0).all(axis = 1)]
+col_check = ['Price']
+condition = (df[col_check] >= 0).all(axis=1)
+df = df[condition]
 
 # converting boolean to int
 df['is_election'] = df['is_election'].astype(int)
 
 print(df)
+
 
 # Define LASSO model
 X = df[['GDP', 'Mortgage (30Yr)', 'is_election', 'CPI', 'FEDFUNDS']]
@@ -94,7 +97,6 @@ test = df[(df['Date'] >= split_date_1) & (df['Date'] <= split_date_2)]
 
 
 # Split the data into training and test sets
-
 
 X_train = train[['GDP', 'Mortgage (30Yr)', 'is_election', 'CPI', 'FEDFUNDS']]
 y_train = train['Price']
