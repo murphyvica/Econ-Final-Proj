@@ -4,6 +4,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import Lasso
 from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.preprocessing import PolynomialFeatures 
+from sklearn.linear_model import LinearRegression
 import matplotlib.pyplot as plt
 import plotly.graph_objs as go
 import plotly.express as px
@@ -59,8 +61,11 @@ df.rename(columns={'WANGSP': 'GDP'}, inplace=True)
 df = df.dropna()
 
 # checks and removes any rows that contain unusual values outside the dataset (negative values)
-col_check = df.select_dtypes(include=[np.number]).columns
-df = df[(df[col_check] >= 0).all(axis = 1)]
+# col_check = df.select_dtypes(include=[np.number]).columns
+# df = df[(df[col_check] >= 0).all(axis = 1)]
+col_check = ['Price']
+condition = (df[col_check] >= 0).all(axis=1)
+df = df[condition]
 
 # converting boolean to int
 df['is_election'] = df['is_election'].astype(int)
@@ -104,14 +109,14 @@ test_results = pd.DataFrame({'Date': dates_test, 'Actual': y_test, 'Predicted': 
 all_results = pd.concat([train_results, test_results]).sort_values('Date')
 
 # Plot the results
-plt.figure(figsize=(10, 6))
-plt.plot(df['Date'], df['Price'], label='Actual')
-plt.plot(all_results['Date'], all_results['Predicted'], label='Predicted')
-plt.xlabel('Date')
-plt.ylabel('Price')
-plt.title('Polynomial Regression')
-plt.legend()
-plt.show()
+# plt.figure(figsize=(10, 6))
+# plt.plot(df['Date'], df['Price'], label='Actual')
+# plt.plot(all_results['Date'], all_results['Predicted'], label='Predicted')
+# plt.xlabel('Date')
+# plt.ylabel('Price')
+# plt.title('Polynomial Regression')
+# plt.legend()
+# plt.show()
 
 ## 5) Creating presentation, 
 
@@ -127,10 +132,10 @@ date_columns = [col for col in state.columns if col not in exclude]
 melted = state.melt(id_vars='RegionName', value_vars=date_columns, var_name='Date', value_name='Price')
 
 # converts to datetime
-df_melted['Date'] = pd.to_datetime(df_melted['Date'], format='%Y-%m-%d')
+melted['Date'] = pd.to_datetime(melted['Date'], format='%Y-%m-%d')
 
 # creates interactive plot
-fig = px.line(df_melted, x='Date', y='Price', color='RegionName', title='Housing Prices Over Time')
+fig = px.line(melted, x='Date', y='Price', color='RegionName', title='Housing Prices Over Time')
 
 # widget to plot
 fig.update_layout(
@@ -141,15 +146,15 @@ fig.update_layout(
                 dict(
                     label="All",
                     method="update",
-                    args=[{"visible": [True] * len(df_melted['RegionName'].unique())},
+                    args=[{"visible": [True] * len(melted['RegionName'].unique())},
                           {"title": "All States"}]),
             ] + [
                 dict(
                     label=state,
                     method="update",
-                    args=[{"visible": [region == state for region in df_melted['RegionName']]},
+                    args=[{"visible": [region == state for region in melted['RegionName']]},
                           {"title": f"State: {state}"}])
-                for state in df_melted['RegionName'].unique()
+                for state in melted['RegionName'].unique()
             ],
             direction="down"
         )

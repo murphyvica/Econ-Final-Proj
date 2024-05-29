@@ -14,8 +14,8 @@ import plotly
 
 # Importing data, selecting subset based on dates of housing data
 
-WA = pd.read_csv("data\Washington.csv")
-GDP = pd.read_csv("data\WA_GDP.csv")
+WA = pd.read_csv("data\washington\Washington.csv")
+GDP = pd.read_csv("data\washington\WANGSP.csv")
 MORT = pd.read_csv("data\MORTGAGE30US.csv")
 CPI = pd.read_csv("data\CPIAUCSL.csv")
 FFUNDS = pd.read_csv("data\FEDFUNDS.csv")
@@ -69,7 +69,6 @@ df.rename(columns={'MORTGAGE30US': 'Mortgage (30Yr)'}, inplace=True)
 df.rename(columns={'WANGSP': 'GDP'}, inplace=True)
 df.rename(columns={'CPIAUCSL': 'CPI'}, inplace=True)
 
-print('2012 Data?', df[(df['Date'] < '2015-01-01') & (df['Date'] > '2011-01-01')])
 ## 2) Cleaning data: check null, negative values
 
 # removes rows of any data points that contain null values
@@ -91,6 +90,7 @@ dates = df['Date']
 
 poly = PolynomialFeatures(degree=3)
 X_poly = poly.fit_transform(X)
+
 
 # create train and test sets
 #X_train, X_test, y_train, y_test, dates_train, dates_test = train_test_split(X_poly, y, df['Date'],test_size = 0.2)
@@ -123,12 +123,28 @@ dates_test = test['Date']
 poly_reg = LinearRegression()
 poly_reg.fit(X_train, y_train)
 
+# Coeffs
+
+coefficients = poly_reg.coef_
+intercept = poly_reg.intercept_
+print("Coefficients:", coefficients)
+print("Intercept:", intercept)
+
+metrics = {'Coeffs' : coefficients}
+out = pd.DataFrame(metrics)
+out.to_csv('coeffs.csv')
+
 # Predictions
 y_pred_train = poly_reg.predict(X_train)
 y_pred_test = poly_reg.predict(X_test)
 
 print(poly_reg.score(X_test, y_test))
 
+mse = mean_squared_error(y_test, y_pred_test)
+r2 = r2_score(y_test, y_pred_test)
+
+print("rmse: ", np.sqrt(mse))
+print("r2: ", r2)
 
 ## 4) Analysis, data viz, r-squared for other states (running LASSO regression for each state, comparing how well model works)
 
@@ -153,7 +169,3 @@ plt.ylabel('Price')
 plt.title('Polynomial Regression')
 plt.legend()
 plt.show()
-
-## 5) Creating presentation, 
-
-

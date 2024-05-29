@@ -10,8 +10,8 @@ import matplotlib.pyplot as plt
 
 # Importing data, selecting subset based on dates of housing data
 
-WA = pd.read_csv("data\Washington.csv")
-GDP = pd.read_csv("data\WA_GDP.csv")
+WA = pd.read_csv("data\washington\Washington.csv")
+GDP = pd.read_csv("data\washington\WANGSP.csv")
 MORT = pd.read_csv("data\MORTGAGE30US.csv")
 CPI = pd.read_csv("data\CPIAUCSL.csv")
 FFUNDS = pd.read_csv("data\FEDFUNDS.csv")
