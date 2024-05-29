@@ -112,7 +112,7 @@ dates_test = test['Date']
 # X_test_scale = scale.transform(X_test)
 
 # train model
-lasso = Lasso(alpha=6000)
+lasso = Lasso(alpha=5500)
 lasso.fit(X_train, y_train)
 
 # prediction model
