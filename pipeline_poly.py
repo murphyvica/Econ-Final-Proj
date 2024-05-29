@@ -7,6 +7,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import Lasso
 from sklearn.metrics import mean_squared_error, r2_score
 import matplotlib.pyplot as plt
+import plotly
 
 
 ## 1) Join housing data, GDP, mortage rates, create boolean column for election year
@@ -18,18 +19,21 @@ GDP = pd.read_csv("data\WA_GDP.csv")
 MORT = pd.read_csv("data\MORTGAGE30US.csv")
 CPI = pd.read_csv("data\CPIAUCSL.csv")
 FFUNDS = pd.read_csv("data\FEDFUNDS.csv")
+POP = pd.read_csv("data\WA_pop.csv")
 
 WA["Date"] = pd.to_datetime(WA["Date"])
 GDP["DATE"] = pd.to_datetime(GDP["DATE"])
 MORT["DATE"] = pd.to_datetime(MORT["DATE"])
 CPI["DATE"] = pd.to_datetime(CPI["DATE"])
 FFUNDS["DATE"] = pd.to_datetime(FFUNDS["DATE"])
+POP['DATE'] = pd.to_datetime(POP['DATE'], format='%Y')
 
 start_date = WA["Date"].min()
 GDP = GDP[GDP.DATE.dt.year >= start_date.year]
 MORT = MORT[MORT.DATE.dt.year >= start_date.year]
 CPI = CPI[CPI.DATE.dt.year >= start_date.year]
 FFUNDS = FFUNDS[FFUNDS.DATE.dt.year >= start_date.year]
+POP = POP[POP.DATE.dt.year >= start_date.year]
 
 # Interpolating GDP and Mortgage data
 
@@ -45,12 +49,17 @@ CPI_day = CPI.resample('D').interpolate(method='spline', order=3)
 FFUNDS.set_index('DATE', inplace=True)
 FFUNDS_day = FFUNDS.resample('D').interpolate(method='spline', order=3)
 
+POP.set_index('DATE', inplace=True)
+POP_day = POP.resample('D').interpolate(method='spline', order=3)
+
+
 # Joining data together
 
 df = pd.merge(WA, GDP_day, left_on="Date", right_on="DATE", how='left')
 df = pd.merge(df, MORT_day, left_on="Date", right_on="DATE", how='left')
 df = pd.merge(df, CPI_day, left_on="Date", right_on="DATE", how='left')
 df = pd.merge(df, FFUNDS_day, left_on="Date", right_on="DATE", how='left')
+df = pd.merge(df, POP_day, left_on="Date", right_on="DATE", how='left')
 
 # adding election year boolean column
 
@@ -73,12 +82,10 @@ df = df[condition]
 
 # converting boolean to int
 df['is_election'] = df['is_election'].astype(int)
-
 print(df)
 
-
 # Define LASSO model
-X = df[['GDP', 'Mortgage (30Yr)', 'is_election', 'CPI', 'FEDFUNDS']]
+X = df[['GDP', 'Mortgage (30Yr)', 'is_election', 'CPI', 'FEDFUNDS', '% Pop Growth']]
 y = df['Price']
 dates = df['Date']
 
@@ -98,19 +105,19 @@ test = df[(df['Date'] >= split_date_1) & (df['Date'] <= split_date_2)]
 
 # Split the data into training and test sets
 
-X_train = train[['GDP', 'Mortgage (30Yr)', 'is_election', 'CPI', 'FEDFUNDS']]
+X_train = train[['GDP', 'Mortgage (30Yr)', 'is_election', 'CPI', 'FEDFUNDS', '% Pop Growth']]
 y_train = train['Price']
 dates_train = train['Date']
 
-X_test = test[['GDP', 'Mortgage (30Yr)', 'is_election', 'CPI', 'FEDFUNDS']]
+X_test = test[['GDP', 'Mortgage (30Yr)', 'is_election', 'CPI', 'FEDFUNDS', '% Pop Growth']]
 y_test = test['Price']
 dates_test = test['Date']
 
 
 # standardizing
-scale = StandardScaler()
-X_train_scale = scale.fit_transform(X_train)
-X_test_scale = scale.transform(X_test)
+# scale = StandardScaler()
+# X_train_scale = scale.fit_transform(X_train)
+# X_test_scale = scale.transform(X_test)
 
 # Train the model
 poly_reg = LinearRegression()
