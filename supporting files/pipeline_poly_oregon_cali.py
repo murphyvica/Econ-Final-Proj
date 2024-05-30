@@ -98,6 +98,8 @@ for state, abv in name_to_abbreviation.items():
     poly = PolynomialFeatures(degree=3)
     X_poly = poly.fit_transform(X)
 
+    # Coeffs
+
     # create train and test sets
     #X_train, X_test, y_train, y_test, dates_train, dates_test = train_test_split(X_poly, y, df['Date'],test_size = 0.2)
 

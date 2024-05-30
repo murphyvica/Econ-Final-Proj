@@ -377,4 +377,4 @@ for state, abv in name_to_abbreviation.items():
     # organizes and sends results to metrics csv file
     metrics = {'State' : [f'{state}'], 'mse' : [mse], 'r2' : [r2]}
     out = pd.DataFrame(metrics)
-    out.to_csv('metrics.csv', mode='a', header=False)
+    out.to_csv('output_data\metrics.csv', mode='a', header=False)
