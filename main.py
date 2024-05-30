@@ -145,7 +145,11 @@ poly_reg.fit(X_train_poly, y_train)
 y_pred_train = poly_reg.predict(X_train_poly)
 y_pred_test = poly_reg.predict(X_test_poly)
 
+train_mse = mean_squared_error(y_train, y_pred_train)
+
 print('Polynomial Regression score: ')
+print('rmse: ', np.sqrt(train_mse))
+print('mse: ', train_mse)
 print("score: ", poly_reg.score(X_test_poly, y_test))
 print('')
 
